@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pausa-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000,
+      "env": {
+        "DATABASE_URL": "postgresql://lucks@localhost:5432/pausa_dev"
+      }
+    }
+  ]
+}

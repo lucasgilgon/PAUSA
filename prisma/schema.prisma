@@ -1,0 +1,382 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")   // necesario para Supabase + pgBouncer
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────
+
+enum PatientStatus {
+  active
+  paused
+  discharged
+  archived
+}
+
+enum RiskLevel {
+  none
+  low
+  moderate
+  high
+  critical
+}
+
+enum TherapyModality {
+  TCC
+  ACT
+  DBT
+  EMDR
+  psico
+  other
+}
+
+enum SessionStatus {
+  scheduled
+  recording
+  processing
+  transcribed
+  generating
+  draft
+  reviewed
+  signed
+  cancelled
+}
+
+enum NoteFormat {
+  SOAP
+  DAP
+  BIRP
+  GIRP
+  free
+}
+
+enum SpeakerRole {
+  psychologist
+  patient
+  unknown
+}
+
+enum AuditAction {
+  patient_view
+  patient_create
+  patient_update
+  patient_delete
+  patient_export
+  session_create
+  session_recording_start
+  session_recording_stop
+  session_audio_delete
+  session_transcription_view
+  session_note_view
+  session_note_edit
+  session_note_sign
+  session_note_export
+  auth_login
+  auth_logout
+  auth_2fa_enable
+  auth_2fa_verify
+  auth_session_timeout
+  settings_security_update
+  settings_key_rotation
+  rgpd_consent_record
+  rgpd_data_export
+  rgpd_data_delete
+  rgpd_anonymize
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────
+
+model Patient {
+  id              String          @id @default(uuid())
+  psychologistId  String
+  shortId         String          @unique @db.VarChar(6)
+
+  // PII — cifrado AES-256-GCM en app layer
+  firstName       String
+  lastName        String
+  dateOfBirth     String
+  email           String?
+  phone           String?
+  emergencyName   String?
+  emergencyPhone  String?
+  therapistNotes  String?
+
+  isAnonymized    Boolean         @default(false)
+  status          PatientStatus   @default(active)
+  currentRisk     RiskLevel       @default(none)
+  therapyModality TherapyModality
+  diagnosisCodes  String[]        @default([])
+
+  totalSessions   Int             @default(0)
+  lastSessionAt   DateTime?
+  nextSessionAt   DateTime?
+
+  consentGiven        Boolean
+  consentDate         DateTime?
+  dataRetentionUntil  DateTime?
+  retentionYears      Int         @default(5)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  archivedAt  DateTime?
+
+  sessions    Session[]
+  notes       Note[]
+  riskAlerts  RiskAlert[]
+
+  @@index([psychologistId])
+  @@index([psychologistId, status])
+  @@index([psychologistId, currentRisk])
+}
+
+model Session {
+  id              String        @id @default(uuid())
+  patientId       String
+  psychologistId  String
+  sessionNumber   Int
+
+  status          SessionStatus @default(scheduled)
+  noteFormat      NoteFormat    @default(SOAP)
+
+  scheduledAt     DateTime
+  startedAt       DateTime?
+  endedAt         DateTime?
+  durationMinutes Int?
+
+  // Audio — Privacidad Flash
+  audioStorageKey       String?
+  audioDurationSeconds  Float?
+  audioSizeBytes        Int?
+  audioMimeType         String?
+  audioDeletedAt        DateTime?
+
+  transcriptionId String?   @unique
+  noteId          String?   @unique
+
+  detectedRiskLevel RiskLevel @default(none)
+
+  therapistObservations String?
+  followUpRequired      Boolean @default(false)
+  followUpNotes         String?
+
+  isAnonymized    Boolean @default(false)
+  consentRecorded Boolean
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patient       Patient        @relation(fields: [patientId], references: [id])
+  transcription Transcription?
+  note          Note?
+  riskAlerts    RiskAlert[]
+
+  @@index([psychologistId])
+  @@index([patientId])
+  @@index([psychologistId, status])
+  @@index([psychologistId, scheduledAt])
+}
+
+model Transcription {
+  id        String @id @default(uuid())
+  sessionId String @unique
+
+  fullText        String
+  diarizedText    String
+  language        String @db.VarChar(2)
+  durationSeconds Float
+  wordCount       Int
+  speakerCount    Int
+  whisperModel    String
+  processingMs    Int
+  isAnonymized    Boolean
+  anonymizedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  session  Session              @relation(fields: [sessionId], references: [id])
+  segments TranscriptionSegment[]
+}
+
+model TranscriptionSegment {
+  id              String      @id @default(uuid())
+  transcriptionId String
+  segmentIndex    Int
+  startSeconds    Float
+  endSeconds      Float
+  text            String
+  speaker         SpeakerRole
+  speakerId       String
+  confidence      Float
+  language        String      @db.VarChar(2)
+
+  transcription Transcription @relation(fields: [transcriptionId], references: [id], onDelete: Cascade)
+
+  @@index([transcriptionId])
+}
+
+model Note {
+  id              String     @id @default(uuid())
+  sessionId       String     @unique
+  patientId       String
+  psychologistId  String
+
+  format          NoteFormat
+  content         Json
+  status          String     @default("draft")
+
+  isAIGenerated   Boolean
+  wasEdited       Boolean    @default(false)
+
+  aiModel             String?
+  aiPromptTokens      Int?
+  aiCompletionTokens  Int?
+  aiLatencyMs         Int?
+  aiConfidence        Float?
+  aiRiskSignals       Json?
+
+  detectedRiskLevel RiskLevel @default(none)
+  riskAlertCreated  Boolean   @default(false)
+
+  isAnonymized Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  signedAt  DateTime?
+  signedBy  String?
+
+  session     Session    @relation(fields: [sessionId], references: [id])
+  patient     Patient    @relation(fields: [patientId], references: [id])
+  editHistory NoteEdit[]
+
+  @@index([patientId])
+  @@index([psychologistId])
+}
+
+model NoteEdit {
+  id            String   @id @default(uuid())
+  noteId        String
+  editedBy      String
+  editedAt      DateTime @default(now())
+  fieldChanged  String
+  previousValue String
+  newValue      String
+  reason        String?
+
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@index([noteId])
+}
+
+model RiskAlert {
+  id        String    @id @default(uuid())
+  patientId String
+  sessionId String?
+
+  level         RiskLevel
+  type          String
+  detectedAt    DateTime  @default(now())
+  acknowledgedAt DateTime?
+  acknowledgedBy String?
+  notes         String?
+  autoDetected  Boolean
+  keywords      String[]  @default([])
+
+  patient Patient  @relation(fields: [patientId], references: [id])
+  session Session? @relation(fields: [sessionId], references: [id])
+
+  @@index([patientId])
+  @@index([patientId, acknowledgedAt])
+}
+
+model SecuritySettings {
+  id              String @id @default(uuid())
+  psychologistId  String @unique
+
+  twoFactorEnabled      Boolean @default(false)
+  twoFactorMethod       String?
+  sessionTimeoutMinutes Int     @default(30)
+  allowedIpRanges       String[] @default([])
+
+  flashPrivacyEnabled          Boolean @default(true)
+  autoAnonymizeTranscriptions  Boolean @default(true)
+  anonymizePatientNames        Boolean @default(true)
+  anonymizeDates               Boolean @default(false)
+  anonymizeLocations           Boolean @default(false)
+
+  dataRetentionYears   Int     @default(5)
+  autoDeleteEnabled    Boolean @default(false)
+  autoDeleteNotifyDays Int     @default(30)
+
+  encryptionEnabled   Boolean @default(true)
+  encryptionAlgorithm String  @default("AES-256-GCM")
+  keyRotationDays     Int     @default(90)
+  lastKeyRotationAt   DateTime?
+
+  dpaSignedWithAnthropic Boolean @default(false)
+  dpaSignedAt            DateTime?
+  dpaVersion             String?
+
+  dataProtectionOfficer String?
+  supervisoryAuthority  String?
+  privacyPolicyVersion  String?
+  lastPrivacyReviewAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id              String      @id @default(uuid())
+  psychologistId  String
+  action          AuditAction
+  resourceType    String
+  resourceId      String?
+  ipAddress       String?
+  userAgent       String?
+  metadata        Json?
+  success         Boolean     @default(true)
+  errorCode       String?
+  createdAt       DateTime    @default(now())
+
+  @@index([psychologistId])
+  @@index([psychologistId, createdAt])
+  @@index([resourceType, resourceId])
+}
+
+// ─── Subscriptions / Billing ───────────────────────────────────────────────
+
+model Subscription {
+  id              String   @id @default(uuid())
+  psychologistId  String   @unique   // Clerk userId
+
+  // Stripe
+  stripeCustomerId      String?  @unique
+  stripeSubscriptionId  String?  @unique
+  stripePriceId         String?
+  stripePaymentLinkId   String?
+
+  // Plan
+  plan       String  @default("free")   // "free" | "premium"
+  status     String  @default("active") // "active" | "cancelled" | "past_due" | "trialing"
+
+  // Límite gratuito: 10 min (600 segundos) de transcripción
+  freeSecondsUsed   Int       @default(0)
+  freeSecondsLimit  Int       @default(600)  // 10 min
+
+  // Suscripción premium
+  currentPeriodStart  DateTime?
+  currentPeriodEnd    DateTime?
+  cancelAtPeriodEnd   Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([psychologistId])
+  @@index([stripeCustomerId])
+}
