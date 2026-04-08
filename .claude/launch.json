@@ -5,7 +5,7 @@
       "name": "pausa-dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "port": 3000,
+      "autoPort": true,
       "env": {
         "DATABASE_URL": "postgresql://lucks@localhost:5432/pausa_dev"
       }
