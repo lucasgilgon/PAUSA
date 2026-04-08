@@ -191,7 +191,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       transcription: {
         id:             effectiveTranscription!.id,
         sessionId:      effectiveTranscription!.sessionId,
-        segments:       effectiveTranscription!.segments.map((s) => ({
+        segments:       effectiveTranscription!.segments.map((s: Record<string, unknown>) => ({
           id:         s.segmentIndex,
           start:      s.startSeconds,
           end:        s.endSeconds,
