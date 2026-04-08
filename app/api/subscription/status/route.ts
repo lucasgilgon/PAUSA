@@ -5,6 +5,8 @@
  * Devuelve el estado de suscripción y uso del psicólogo autenticado.
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { checkUsageLimit } from "@/lib/stripe";
