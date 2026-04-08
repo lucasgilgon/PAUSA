@@ -11,7 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { stripe, markAsPremium, getOrCreateSubscription } from "@/lib/stripe";
+import { getStripe, markAsPremium, getOrCreateSubscription } from "@/lib/stripe";
 import { db } from "@/lib/db";
 
 // Stripe requiere el body RAW (no parseado) para verificar la firma
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   let event;
   try {
     event = secret
-      ? stripe.webhooks.constructEvent(body, signature, secret)
+      ? getStripe().webhooks.constructEvent(body, signature, secret)
       : JSON.parse(body); // Modo dev sin firma (ngrok / test)
   } catch (err) {
     console.error("[Stripe] Webhook signature invalid:", err);
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         const stripeSubscriptionId = session.subscription as string;
 
         if (stripeSubscriptionId) {
-          const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+          const subscription = await getStripe().subscriptions.retrieve(stripeSubscriptionId);
           const sub = subscription as any;
           await markAsPremium({
             psychologistId:      psychologistId ?? undefined,
