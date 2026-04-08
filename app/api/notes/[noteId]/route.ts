@@ -26,12 +26,12 @@ const PatchNoteSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ noteId: string }> }
+  { params }: { params: { noteId: string } }
 ): Promise<NextResponse> {
   const { userId } = await auth();
   if (!userId) return NextResponse.json(apiError("UNAUTHORIZED", "No autenticado"), { status: 401 });
 
-  const { noteId } = await params;
+  const { noteId } = params;
 
   const note = await db.note.findFirst({
     where:   { id: noteId, psychologistId: userId },
@@ -51,12 +51,12 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ noteId: string }> }
+  { params }: { params: { noteId: string } }
 ): Promise<NextResponse> {
   const { userId } = await auth();
   if (!userId) return NextResponse.json(apiError("UNAUTHORIZED", "No autenticado"), { status: 401 });
 
-  const { noteId } = await params;
+  const { noteId } = params;
 
   const existing = await db.note.findFirst({
     where: { id: noteId, psychologistId: userId },
