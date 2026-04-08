@@ -135,7 +135,7 @@ export function OnboardingWizard() {
             <div className="flex flex-col gap-3 mb-6">
               {[
                 { icon: Mic,      text: "Graba sesiones — el audio se elimina tras transcribir" },
-                { icon: FileText, text: "Notas SOAP/DAP/BIRP generadas con Claude IA" },
+                { icon: FileText, text: "Notas SOAP/DAP/BIRP generadas con IA local (Ollama)" },
                 { icon: Lock,     text: "Datos cifrados AES-256 · Cumplimiento RGPD" },
               ].map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-start gap-3">
@@ -262,9 +262,8 @@ export function OnboardingWizard() {
             <div className="flex items-start gap-2 p-3 bg-warning/10 rounded-lg border border-warning/20 mb-5">
               <AlertTriangle size={13} className="text-warning flex-shrink-0 mt-0.5" />
               <p className="text-2xs text-warning leading-relaxed">
-                <span className="font-bold">Recuerda:</span> Debes firmar un DPA (Data Processing Agreement)
-                con Anthropic antes de usar Claude con datos reales de pacientes (Art. 28 RGPD).
-                Puedes hacerlo desde Seguridad → Acuerdos legales.
+                <span className="font-bold">Recuerda:</span> La IA se ejecuta localmente con Ollama — los datos de pacientes
+                no salen de tu red. Confirma igualmente el cumplimiento RGPD desde Seguridad → Acuerdos legales.
               </p>
             </div>
 

@@ -10,7 +10,7 @@ import { z } from "zod";
 import { db }              from "@/lib/db";
 import { transcribeLogger } from "@/lib/logger";
 import { writeAudit, extractRequestContext } from "@/lib/audit";
-import { transcribeAudio }  from "@/lib/whisper";
+import { transcribeAudio }  from "@/lib/chirp3";
 import { apiSuccess, apiError } from "@/lib/utils";
 import { checkUsageLimit, addTranscriptionSeconds } from "@/lib/stripe";
 
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
   } catch (err) {
     await db.session.update({ where: { id: sessionId }, data: { status: "recording" } });
-    transcribeLogger.error({ err, sessionId }, "Whisper transcription failed");
+    transcribeLogger.error({ err, sessionId }, "Chirp 3 transcription failed");
     return NextResponse.json(
       apiError("TRANSCRIPTION_FAILED", "Error al transcribir el audio. Inténtalo de nuevo."),
       { status: 503 }

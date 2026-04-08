@@ -56,6 +56,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
 
   return (
     <SessionRecorder
+      key={session.id}
       session={{
         id:              session.id,
         patientId:       session.patientId,

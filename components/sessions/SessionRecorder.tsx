@@ -468,7 +468,7 @@ function RecordingStatus({
     return (
       <div className="flex items-center justify-center gap-2">
         <Loader2 size={13} className="text-primary animate-spin" />
-        <p className="text-xs text-primary font-medium">Generando nota clínica con Claude...</p>
+        <p className="text-xs text-primary font-medium">Generando nota clínica con IA local...</p>
       </div>
     );
   }
@@ -495,7 +495,7 @@ function GeneratingState() {
       </div>
       <div className="text-center">
         <p className="text-sm font-semibold text-text-primary">Generando nota clínica</p>
-        <p className="text-xs text-text-tertiary mt-1">Claude está analizando la transcripción...</p>
+        <p className="text-xs text-text-tertiary mt-1">La IA local está analizando la transcripción...</p>
       </div>
       <div className="flex gap-1">
         {[0, 1, 2].map((i) => (

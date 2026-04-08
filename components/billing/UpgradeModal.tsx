@@ -27,7 +27,7 @@ const FEATURES_FREE = [
 
 const FEATURES_PREMIUM = [
   "Transcripción ilimitada",
-  "Notas IA ilimitadas con Claude",
+  "Notas IA ilimitadas (Ollama local)",
   "Pacientes ilimitados",
   "Detección de riesgo avanzada",
   "Exportación de notas (PDF)",
