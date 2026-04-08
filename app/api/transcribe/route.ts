@@ -4,6 +4,8 @@
  * POST /api/transcribe — Transcribe audio con Whisper + Privacidad Flash.
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";

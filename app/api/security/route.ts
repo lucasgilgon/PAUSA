@@ -5,6 +5,8 @@
  * PATCH /api/security — Actualiza configuración de seguridad
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db }             from "@/lib/db";

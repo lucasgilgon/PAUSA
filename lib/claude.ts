@@ -12,9 +12,12 @@
 import type { NoteFormat, NoteContent, AIGenerationMeta, RiskLevel } from "@/types";
 import type { Transcription } from "@/types/session";
 import { noteLogger } from "@/lib/logger";
+import Anthropic from "@anthropic-ai/sdk";
 
-const OLLAMA_BASE_URL = (process.env.OLLAMA_BASE_URL ?? "http://localhost:11434").replace(/\/$/, "");
-const MODEL           = process.env.OLLAMA_MODEL ?? "gemma3";
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY || "",
+});
+const MODEL = "claude-3-haiku-20240307";
 
 export interface GenerateNoteOptions {
   transcription:      Transcription;
@@ -125,55 +128,40 @@ IMPORTANTE — Responde ÚNICAMENTE con JSON válido con esta estructura exacta 
 }`;
 }
 
-// ─── Cliente Ollama ─────────────────────────────────────────────────────────
+// ─── Cliente Anthropic ──────────────────────────────────────────────────────
 
-interface OllamaResult {
+interface ClaudeResult {
   text:             string;
   promptTokens:     number;
   completionTokens: number;
   totalDurationMs:  number;
 }
 
-async function callOllama(
+async function callClaude(
   systemPrompt: string,
   userPrompt:   string,
   maxTokens     = 4096
-): Promise<OllamaResult> {
+): Promise<ClaudeResult> {
   const startMs = Date.now();
 
-  const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify({
-      model:   MODEL,
-      stream:  false,
-      options: { num_predict: maxTokens },
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user",   content: userPrompt   },
-      ],
-    }),
+  const response = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: maxTokens,
+    system: systemPrompt,
+    messages: [
+      { role: "user", content: userPrompt }
+    ],
+    temperature: 0.2, // Baja temperatura para documentación clínica
   });
 
-  if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    throw new Error(`Ollama ${response.status}: ${body.slice(0, 300)}`);
-  }
-
-  const data = await response.json() as {
-    message?:          { content?: string };
-    prompt_eval_count?: number;
-    eval_count?:        number;
-    total_duration?:    number;
-  };
+  const textBlock = response.content.find(c => c.type === "text");
+  const text = textBlock && textBlock.type === "text" ? textBlock.text : "";
 
   return {
-    text:             data.message?.content ?? "",
-    promptTokens:     data.prompt_eval_count  ?? 0,
-    completionTokens: data.eval_count         ?? 0,
-    totalDurationMs:  data.total_duration
-      ? Math.round(data.total_duration / 1_000_000)  // ns → ms
-      : Date.now() - startMs,
+    text:             text,
+    promptTokens:     response.usage?.input_tokens ?? 0,
+    completionTokens: response.usage?.output_tokens ?? 0,
+    totalDurationMs:  Date.now() - startMs,
   };
 }
 
@@ -201,14 +189,14 @@ function parseNoteResponse(
   } catch {
     const match = rawText.match(/\{[\s\S]*\}/);
     if (!match) {
-      noteLogger.error({ rawText: rawText.slice(0, 500), format }, "No JSON found in Ollama response");
-      throw new Error(`Ollama no devolvió JSON válido. Respuesta: ${rawText.slice(0, 200)}`);
+      noteLogger.error({ rawText: rawText.slice(0, 500), format }, "No JSON found in Claude response");
+      throw new Error(`Claude no devolvió JSON válido. Respuesta: ${rawText.slice(0, 200)}`);
     }
     try {
       parsed = JSON.parse(match[0]) as OllamaNoteResponse;
     } catch (e2) {
       noteLogger.error({ rawText: rawText.slice(0, 500), format, err: e2 }, "JSON parse failed after extraction");
-      throw new Error(`Error al parsear la respuesta de Ollama: ${(e2 as Error).message}`);
+      throw new Error(`Error al parsear la respuesta de Claude: ${(e2 as Error).message}`);
     }
   }
 
@@ -278,12 +266,12 @@ export async function generateClinicalNote(
       durationSecs: opts.transcription.durationSeconds,
       model:        MODEL,
     },
-    "Generating clinical note with Ollama"
+    "Generating clinical note with Claude 3 Haiku"
   );
 
-  const ollama    = await callOllama(SYSTEM_PROMPT, prompt, 4096);
+  const claudeRes = await callClaude(SYSTEM_PROMPT, prompt, 4096);
   const latencyMs = Date.now() - startMs;
-  const rawText   = ollama.text;
+  const rawText   = claudeRes.text;
 
   const { parsed, content } = parseNoteResponse(rawText, opts.format);
 
@@ -298,10 +286,10 @@ export async function generateClinicalNote(
   );
 
   const meta: AIGenerationMeta = {
-    model:            `ollama/${MODEL}`,
-    promptTokens:     ollama.promptTokens,
-    completionTokens: ollama.completionTokens,
-    totalTokens:      ollama.promptTokens + ollama.completionTokens,
+    model:            MODEL,
+    promptTokens:     claudeRes.promptTokens,
+    completionTokens: claudeRes.completionTokens,
+    totalTokens:      claudeRes.promptTokens + claudeRes.completionTokens,
     latencyMs,
     generatedAt:      new Date().toISOString(),
     confidence:       typeof parsed.confidence === "number"
@@ -322,7 +310,7 @@ export async function generateClinicalNote(
       riskLevel: maxRisk,
       riskCount: (parsed.riskSignals ?? []).length,
     },
-    "Clinical note generated via Ollama"
+    "Clinical note generated via Claude 3 Haiku"
   );
 
   return { content, meta, rawText };
@@ -334,7 +322,7 @@ export async function detectRiskSignals(
   transcriptionText: string,
   sessionId:         string
 ): Promise<RiskSignal[]> {
-  noteLogger.info({ sessionId, model: MODEL }, "Running dedicated risk detection pass via Ollama");
+  noteLogger.info({ sessionId, model: MODEL }, "Running dedicated risk detection pass via Claude");
 
   const userPrompt = `Analiza este texto de una sesión terapéutica y extrae ÚNICAMENTE señales de riesgo clínico (ideación suicida, autolesiones, riesgo para terceros, crisis aguda).
 
@@ -346,13 +334,13 @@ ${transcriptionText.slice(0, 4000)}
 Responde con JSON: { "signals": [{ "keyword": "...", "context": "...", "severity": "none|low|moderate|high|critical" }] }
 Si no hay señales, responde: { "signals": [] }`;
 
-  const ollama = await callOllama(
+  const claudeRes = await callClaude(
     "Eres un sistema especializado en detección de señales de riesgo clínico. Respondes ÚNICAMENTE con JSON válido. Tu objetivo es proteger la seguridad del paciente.",
     userPrompt,
     512
   );
 
-  const rawText = ollama.text
+  const rawText = claudeRes.text
     .replace(/^```json\s*/i, "")
     .replace(/\s*```$/i,     "")
     .trim();

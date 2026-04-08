@@ -6,6 +6,8 @@
  * DELETE /api/patients/[id] — Archivar paciente (soft delete, RGPD)
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";

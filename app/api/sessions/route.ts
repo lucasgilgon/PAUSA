@@ -6,6 +6,8 @@
  * Valida que el paciente pertenece al psicólogo autenticado.
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";

@@ -5,6 +5,8 @@
  * PATCH /api/notes/[noteId] — Actualizar status o contenido
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
