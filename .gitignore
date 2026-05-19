@@ -30,3 +30,10 @@ next-env.d.ts
 
 # Prisma
 prisma/migrations/
+
+# Temporary screenshots during development
+audit-*.png
+elegant-*.png
+final-*.png
+human-*.png
+landing-*.png
