@@ -1,0 +1,21 @@
+{
+  "name": "PAUSA - Documentación clínica con IA",
+  "short_name": "PAUSA",
+  "description": "La IA que transcribe tus sesiones y genera notas clínicas automáticamente. Formatos SOAP, DAP, BIRP, GIRP. Servidores en Europa.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F5F2",
+  "theme_color": "#0B1F2E",
+  "icons": [
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

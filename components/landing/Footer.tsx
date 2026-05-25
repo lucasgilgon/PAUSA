@@ -42,6 +42,9 @@ export default function Footer() {
             <a href="#inversion" className="text-[#C4956A] hover:text-[#FFFFFF] transition-colors">
               Inversión
             </a>
+            <a href="#faq" className="text-[#C4956A] hover:text-[#FFFFFF] transition-colors">
+              FAQ
+            </a>
             <a href="#contacto" className="text-[#C4956A] hover:text-[#FFFFFF] transition-colors">
               Contacto
             </a>

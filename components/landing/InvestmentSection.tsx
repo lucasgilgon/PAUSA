@@ -53,10 +53,42 @@ export default function InvestmentSection() {
               </p>
             </div>
 
-            <div className="mt-12 space-y-6">
+            {/* Los números reales */}
+            <div className="mt-12 mb-12">
+              <h3
+                className="text-lg font-semibold text-white mb-6"
+                style={{ fontFamily: "var(--font-manrope)" }}
+              >
+                Los números reales
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: "Usuarios activos", value: "12" },
+                  { label: "MRR mensual", value: "228€" },
+                  { label: "Runway actual", value: "6 meses" },
+                  { label: "Ticket buscado", value: "150K€" },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="p-4 bg-[rgba(255,255,255,0.03)] border border-[rgba(196,149,106,0.25)]"
+                    style={{ borderRadius: "10px" }}
+                  >
+                    <div className="text-2xl font-medium text-[#C4956A] mb-1" style={{ fontFamily: "var(--font-playfair)" }}>
+                      {item.value}
+                    </div>
+                    <div className="text-xs text-[#B8C4CC]">{item.label}</div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-[#8A8A8A] mt-3">
+                * Datos actualizados a mayo 2026. Sin adornos.
+              </p>
+            </div>
+
+            <div className="space-y-6">
               <div
                 className="p-6 bg-[rgba(255,255,255,0.03)] border transition-colors duration-300 hover:border-[rgba(196,149,106,0.5)]"
-                style={{ borderRadius: "0px", borderColor: "rgba(196,149,106,0.25)" }}
+                style={{ borderRadius: "12px", borderColor: "rgba(196,149,106,0.25)" }}
               >
                 <h3
                   className="text-lg font-semibold text-white mb-2"
@@ -74,7 +106,7 @@ export default function InvestmentSection() {
 
               <div
                 className="p-6 bg-[rgba(255,255,255,0.03)] border transition-colors duration-300 hover:border-[rgba(196,149,106,0.5)]"
-                style={{ borderRadius: "0px", borderColor: "rgba(196,149,106,0.25)" }}
+                style={{ borderRadius: "12px", borderColor: "rgba(196,149,106,0.25)" }}
               >
                 <h3
                   className="text-lg font-semibold text-white mb-2"
@@ -91,7 +123,7 @@ export default function InvestmentSection() {
 
               <div
                 className="p-6 bg-[rgba(255,255,255,0.03)] border transition-colors duration-300 hover:border-[rgba(196,149,106,0.5)]"
-                style={{ borderRadius: "0px", borderColor: "rgba(196,149,106,0.25)" }}
+                style={{ borderRadius: "12px", borderColor: "rgba(196,149,106,0.25)" }}
               >
                 <h3
                   className="text-lg font-semibold text-white mb-2"
@@ -111,7 +143,7 @@ export default function InvestmentSection() {
               <a
                 href="#contacto"
                 className="inline-flex items-center justify-center px-10 py-4 text-base font-semibold border border-[#C4956A] text-[#C4956A] bg-transparent hover:bg-[#C4956A] hover:text-[#0B1F2E] transition-colors"
-                style={{ borderRadius: "0px" }}
+                style={{ borderRadius: "12px" }}
               >
                 ¿Hablamos?
               </a>

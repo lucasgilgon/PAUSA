@@ -20,8 +20,11 @@ export default function LandingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className="scroll-smooth">
-      <body className="landing-body">{children}</body>
-    </html>
+    <div className="landing-body">
+      <a href="#main" className="skip-link">
+        Saltar al contenido
+      </a>
+      {children}
+    </div>
   );
 }

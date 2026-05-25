@@ -610,6 +610,36 @@
   opacity: 1;
 }
 
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #0B1F2E;
+  color: #fff;
+  padding: 8px 16px;
+  z-index: 100;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 0 0 8px 0;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Scroll progress bar */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #C4956A, #E5B88A);
+  z-index: 60;
+  transition: width 0.1s linear;
+}
+
 /* ─── Landing Animations ───────────────────────────────────────────────── */
 
 @keyframes hero-line-appear {

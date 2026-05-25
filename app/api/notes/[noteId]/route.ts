@@ -10,13 +10,13 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
-import { db }         from "@/lib/db";
+import { db } from "@/lib/db";
 import { noteLogger } from "@/lib/logger";
 import { writeAudit, extractRequestContext } from "@/lib/audit";
 import { apiSuccess, apiError, formatZodError } from "@/lib/utils";
 
 const PatchNoteSchema = z.object({
-  status:  z.enum(["draft", "reviewed", "signed", "rejected"]).optional(),
+  status: z.enum(["draft", "reviewed", "signed", "rejected"]).optional(),
   content: z.record(z.string()).optional(),
   editReason: z.string().max(500).optional(),
 }).refine(
@@ -26,15 +26,15 @@ const PatchNoteSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { noteId: string } }
+  { params }: { params: Promise<{ noteId: string }> }
 ): Promise<NextResponse> {
   const { userId } = await auth();
   if (!userId) return NextResponse.json(apiError("UNAUTHORIZED", "No autenticado"), { status: 401 });
 
-  const { noteId } = params;
+  const { noteId } = await params;
 
   const note = await db.note.findFirst({
-    where:   { id: noteId, psychologistId: userId },
+    where: { id: noteId, psychologistId: userId },
     include: { editHistory: { orderBy: { editedAt: "desc" }, take: 10 } },
   });
 
@@ -51,12 +51,12 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { noteId: string } }
+  { params }: { params: Promise<{ noteId: string }> }
 ): Promise<NextResponse> {
   const { userId } = await auth();
   if (!userId) return NextResponse.json(apiError("UNAUTHORIZED", "No autenticado"), { status: 401 });
 
-  const { noteId } = params;
+  const { noteId } = await params;
 
   const existing = await db.note.findFirst({
     where: { id: noteId, psychologistId: userId },
@@ -92,11 +92,11 @@ export async function PATCH(
       .filter(([k, v]) => prevContent[k] !== v)
       .map(([field, newValue]) => ({
         noteId,
-        editedBy:      userId,
-        fieldChanged:  field,
+        editedBy: userId,
+        fieldChanged: field,
         previousValue: prevContent[field] ?? "",
         newValue,
-        reason:        editReason,
+        reason: editReason,
       }));
 
     if (editRecords.length > 0) {
@@ -107,7 +107,7 @@ export async function PATCH(
   const updated = await db.note.update({
     where: { id: noteId },
     data: {
-      ...(status  ? { status } : {}),
+      ...(status ? { status } : {}),
       ...(content ? { content: content as never, wasEdited: true } : {}),
       ...(status === "signed" ? { signedAt: new Date(), signedBy: userId } : {}),
     },

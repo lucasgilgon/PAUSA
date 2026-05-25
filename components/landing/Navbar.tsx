@@ -16,7 +16,8 @@ export default function Navbar() {
   const navLinks = [
     { href: "#producto", label: "Producto" },
     { href: "#tecnologia", label: "Tecnología" },
-    { href: "#inversion", label: "Inversión" },
+    { href: "#precio", label: "Precio" },
+    { href: "#faq", label: "FAQ" },
     { href: "#contacto", label: "Contacto" },
   ];
 
@@ -69,9 +70,9 @@ export default function Navbar() {
             <a
               href="#contacto"
               className="inline-flex items-center justify-center px-5 py-2.5 bg-[#0B1F2E] text-white text-[11px] font-semibold uppercase tracking-[0.15em] hover:bg-[#1A3A4F] transition-colors"
-              style={{ borderRadius: "0px" }}
+              style={{ borderRadius: "10px" }}
             >
-              Escríbeme
+              Empieza gratis
             </a>
           </div>
 
@@ -119,10 +120,10 @@ export default function Navbar() {
             <a
               href="#contacto"
               className="mt-2 inline-flex items-center justify-center px-5 py-3 bg-[#0B1F2E] text-white text-sm font-semibold uppercase tracking-[0.15em]"
-              style={{ borderRadius: "0px" }}
+              style={{ borderRadius: "10px" }}
               onClick={() => setMobileOpen(false)}
             >
-              Escríbeme
+              Empieza gratis
             </a>
           </div>
         </div>

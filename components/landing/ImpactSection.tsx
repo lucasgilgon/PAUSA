@@ -24,9 +24,9 @@ const impacts = [
   },
   {
     icon: TrendingUp,
-    value: "99.9%",
-    label: "reducción de errores de documentación",
-    desc: "La IA estructura la información de forma consistente y completa, reduciendo omisiones.",
+    value: "100%",
+    label: "estructura consistente en cada nota",
+    desc: "La IA sigue el mismo formato siempre, sin olvidar campos ni dejar secciones en blanco.",
   },
 ];
 
@@ -49,7 +49,7 @@ export default function ImpactSection() {
   }, []);
 
   return (
-    <section className="landing-section bg-[#FFFFFF]">
+    <section id="impacto" className="landing-section bg-[#FFFFFF]">
       <div className="landing-container">
         <div ref={ref} className={`reveal ${visible ? "visible" : ""}`}>
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -81,15 +81,15 @@ export default function ImpactSection() {
                 <div
                   key={item.label}
                   className="flex items-start gap-5 p-6 bg-[#F7F5F2] border border-[#E0DCD7] card-lift cursor-default"
-                  style={{ borderRadius: "0px", transitionDelay: `${i * 100}ms` }}
+                  style={{ borderRadius: "12px", transitionDelay: `${i * 100}ms` }}
                 >
-                  <div className="w-12 h-12 bg-[#F0EDE8] flex items-center justify-center text-[#0B1F2E] flex-shrink-0 card-icon-vibrant">
+                  <div className="w-12 h-12 bg-[#F0EDE8] flex items-center justify-center text-[#0B1F2E] flex-shrink-0 card-icon-vibrant" style={{ borderRadius: "10px" }}>
                     <item.icon size={22} strokeWidth={2} />
                   </div>
                   <div>
                     <div className="flex items-baseline gap-3 mb-1">
                       <span
-                        className="text-2xl font-medium text-[#1A1A1A]"
+                        className="text-2xl font-medium text-[#C4956A]"
                         style={{ fontFamily: "var(--font-playfair)" }}
                       >
                         {item.value}

@@ -21,7 +21,7 @@ export default function TeamSection() {
   }, []);
 
   return (
-    <section className="landing-section bg-[#FFFFFF]">
+    <section id="equipo" className="landing-section bg-[#FFFFFF]">
       <div className="landing-container">
         <div ref={ref} className={`reveal ${visible ? "visible" : ""}`}>
           <div className="max-w-3xl">
@@ -37,16 +37,17 @@ export default function TeamSection() {
 
             <div
               className="bg-[#F7F5F2] border border-[#E0DCD7] p-8 md:p-10"
-              style={{ borderRadius: "0px" }}
+              style={{ borderRadius: "12px" }}
             >
               <div className="flex flex-col md:flex-row gap-8 items-start">
+                {/* Avatar con iniciales */}
                 <div
-                  className="w-24 h-24 bg-[#F0EDE8] flex items-center justify-center flex-shrink-0"
-                  style={{ borderRadius: "0px" }}
+                  className="w-24 h-24 bg-gradient-to-br from-[#0B1F2E] to-[#1A3A4F] flex items-center justify-center flex-shrink-0"
+                  style={{ borderRadius: "50%" }}
                 >
                   <span
-                    className="text-3xl font-medium"
-                    style={{ fontFamily: "var(--font-playfair)", color: "#C4956A" }}
+                    className="text-3xl font-medium text-[#C4956A]"
+                    style={{ fontFamily: "var(--font-playfair)" }}
                   >
                     LG
                   </span>
@@ -66,8 +67,8 @@ export default function TeamSection() {
                     <p>
                       Empecé esto porque vi a mi hermana, a amigos, a gente que
                       quiero, pasar horas escribiendo notas en lugar de descansar
-                      o estar con su familia. Pensé: "Esto lo puede hacer una
-                      máquina, y la máquina no se cansa."
+                      o estar con su familia. Pensé: &ldquo;Esto lo puede hacer una
+                      máquina, y la máquina no se cansa.&rdquo;
                     </p>
                     <p>
                       No vengo del mundo de las startups. Vengo de construir
@@ -84,13 +85,13 @@ export default function TeamSection() {
                     <a
                       href="mailto:lucasgilgon@gmail.com"
                       className="inline-flex items-center px-4 py-2 bg-[#FFFFFF] text-[#0B1F2E] border border-[#E0DCD7] hover:border-[#C4956A] hover:text-[#C4956A] transition-colors"
-                      style={{ borderRadius: "0px" }}
+                      style={{ borderRadius: "10px" }}
                     >
                       lucasgilgon@gmail.com
                     </a>
                     <span
                       className="inline-flex items-center px-4 py-2 bg-[#FFFFFF] text-[#5A5A5A] border border-[#E0DCD7]"
-                      style={{ borderRadius: "0px" }}
+                      style={{ borderRadius: "10px" }}
                     >
                       666 627 415
                     </span>

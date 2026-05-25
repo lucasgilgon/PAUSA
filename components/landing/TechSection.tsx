@@ -78,9 +78,9 @@ export default function TechSection() {
               <div
                 key={t.title}
                 className="group p-8 bg-[#FFFFFF] border border-[#E0DCD7] card-lift hover:bg-[#FFFFFF] cursor-default"
-                style={{ borderRadius: "0px", transitionDelay: `${i * 100}ms` }}
+                style={{ borderRadius: "12px", transitionDelay: `${i * 100}ms` }}
               >
-                <div className="w-11 h-11 bg-[#F0EDE8] flex items-center justify-center card-icon-vibrant text-[#0B1F2E] mb-5">
+                <div className="w-11 h-11 bg-[#F0EDE8] flex items-center justify-center card-icon-vibrant text-[#0B1F2E] mb-5" style={{ borderRadius: "10px" }}>
                   <t.icon size={20} strokeWidth={2} />
                 </div>
                 <h3
